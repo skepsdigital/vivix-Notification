@@ -25,14 +25,15 @@ export const handler = async (
   const responder = new Responder();
   try {
     const useCase = new notification(axios, uuidv4);
-
+    const body = JSON.parse(event.body as string);
     try {
-      const body = JSON.parse(event.body as string);
       const response = await useCase.init(body as BodyRequest);
       return responder.send(200, response);
-    } catch (useCaseError) {
+    } catch (useCaseError: any) {
       console.error(useCaseError);
-
+      if (useCaseError.statusCode) {
+        return responder.send(useCaseError.statusCode, { error: useCaseError.message });
+      }
       return responder.send(500, { errorMessage: 'Erro ao executar.' });
     }
   } catch (error) {

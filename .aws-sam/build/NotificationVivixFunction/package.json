@@ -10,13 +10,11 @@
     "axios": ">=1.3.4",
     "uuid": "^9.0.0"
   },
-  "scripts": {
+"scripts": {
+    "build": "tsc && node copy-package.js && sam build",
+    "deploy": "npm run build && sam deploy --guided",
     "watch": "tsc --watch",
-    "start:local": "tsc && cp package.json dist/ && cd dist && npm install --production && cd .. && sam local start-api",
-    "clear": "rm -rf node_modules && rm -rf .aws-sam/build && rm -rf dist",
-    "pre-build": "npm i && tsc && cp package.json dist/",
-    "build": "npm install --omit=dev --prefix ./dist && sam build",
-    "deploy": "npm run clear && npm run pre-build && npm run build && sam deploy"
+    "start:local": "npm run watch & rm -r ./.aws-sam & sam local start-api"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.114",

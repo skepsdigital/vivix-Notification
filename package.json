@@ -16,7 +16,7 @@
     "clear": "rm -rf node_modules && rm -rf .aws-sam/build && rm -rf dist",
     "pre-build": "npm i && tsc && cp package.json dist/",
     "build": "npm install --omit=dev --prefix ./dist && sam build",
-    "deploy": "npm run clear && npm run pre-build && npm run build && sam deploy"
+    "deploy": "npm run build && sam deploy --guided"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.114",

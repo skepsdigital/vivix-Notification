@@ -5,7 +5,7 @@ version = 0.1
 [default]
 [default.global]
 [default.global.parameters]
-stack_name = "schedule-notification"
+stack_name = "vivix-notification"
 
 [default.build]
 [default.build.parameters]
@@ -24,7 +24,7 @@ resolve_s3 = true
 region = "sa-east-1"
 disable_rollback = true
 image_repositories = []
-s3_prefix = "schedule-notification"
+s3_prefix = "vivix-notification"
 
 [default.package]
 [default.package.parameters]

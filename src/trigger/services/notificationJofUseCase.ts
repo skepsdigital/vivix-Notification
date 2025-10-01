@@ -23,6 +23,13 @@ export class notification {
     const templateKey = this.identificarTemplate(body);
     const mensagensParams = this.formatarBody(body, templateKey);
     const mensagensConfig = this.formatar(body, templateKey);
+    const emptyField = this.findEmptyField(mensagensParams);
+
+    if (emptyField) {
+      const err: any = new Error("Campo obrigatório ausente ou vazio");
+      err.statusCode = 422;
+      throw err;
+    }
 
     console.log("Authorization", process.env.BLIP_TOKEN || "Key dml2aXhyb3V0ZXI6N29sTk5PdkJKR1NzWFIxbDZkNmM=");
 
@@ -175,6 +182,7 @@ export class notification {
   }
 
   formatarBody(body: any, templateKey: string) {
+
     switch (templateKey) {
       case "d3_monitoramento_01":
         return {
@@ -185,39 +193,33 @@ export class notification {
           "5": body.distancia,
           "6": body.previsaoChegada,
           "7": body.localizacao,
-        }
-           
+        };
       case "d2_motorista_01":
         return {
-            "1": body.nome,
-            "2": body.horarioChegada,
-            "3": body.numPedido,
-            "4": body.DataHoraGrade,
-        }
-
+          "1": body.nome,
+          "2": body.horarioChegada,
+          "3": body.numPedido,
+          "4": body.DataHoraGrade,
+        };
       case "d1_liberado_01":
         return {
           "1": body.nome,
           "2": body.numPedido
         };
-
       case "d4_liberacao_01":
         return (body.listaPedidosPendentes || []).map((pedido: any) => {
           let dataSolicitacao = pedido.dataSolicitacao;
-
           if (dataSolicitacao) {
             try {
               const data = new Date(dataSolicitacao);
               const day = String(data.getUTCDate()).padStart(2, "0");
               const month = String(data.getUTCMonth() + 1).padStart(2, "0");
               const year = data.getUTCFullYear();
-
               dataSolicitacao = `${day}/${month}/${year}`;
             } catch (e) {
               console.warn("Erro ao formatar dataSolicitacao:", pedido.dataSolicitacao);
             }
           }
-
           return {
             "1": body.nome,
             "2": pedido.numPedido,
@@ -225,20 +227,18 @@ export class notification {
             "4": pedido.valorPedido,
           };
         });
-
       case "d5_solicitacao_01":
         return (body.produtosReclamados || []).map((produto: any) => ({
-            "1": body.nome,
-            "2": body.ticket,
-            "3": body.statusResolução,
-            "4": produto.nomeProduto,
-            "5": produto.qtdReclamada,
-            "6": produto.qtdProcedente,
-            "7": body.nf,
-            "8": body.valorCredito,
-            "9": body.laudo,
+          "1": body.nome,
+          "2": body.ticket,
+          "3": body.statusResolução,
+          "4": produto.nomeProduto,
+          "5": produto.qtdReclamada,
+          "6": produto.qtdProcedente,
+          "7": body.nf,
+          "8": body.valorCredito,
+          "9": body.laudo.replace(/\n+/g, ' '),
         }));
-
       case "d5_solicitacao_02":
         return (body.produtosReclamados || []).map((produto: any) => ({
           "1": body.nome,
@@ -249,13 +249,28 @@ export class notification {
           "6": produto.qtdProcedente,
           "7": body.nf,
           "8": body.valorCredito,
-        }));  
-
+        }));
       default:
         throw new Error("Template não mapeado");
     }
   }
 
+  private findEmptyField(params: any): string | { field: string, index: number } | null {
+    if (Array.isArray(params)) {
+      for (let i = 0; i < params.length; i++) {
+        for (const key in params[i]) {
+          if (!params[i][key]) return { field: key, index: i + 1 };
+        }
+      }
+    } else {
+      for (const key in params) {
+        if (!params[key]) return key;
+      }
+    }
+    return null;
+  }
+
+  
   formatWhatsAppNumber(rawNumber: string): string {
     if (!rawNumber) throw new Error("Número de WhatsApp não informado");
     return rawNumber.replace(/\D/g, "");
@@ -268,5 +283,4 @@ export class notification {
     const ms = agora.getMilliseconds();
     return `${nome} - ${data} ${hora}.${ms}`;
   }
-
 }
