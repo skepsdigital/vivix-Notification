@@ -12,7 +12,7 @@ export class notification {
     "d4_liberacao_01": "23f6aadc-bc47-4bd7-8bbb-b00eb1e08e4f",
     "d5_solicitacao_01": "d3ca8f10-e72e-4696-b2ce-0fa95625dea7",
     "d5_solicitacao_02": "d3ca8f10-e72e-4696-b2ce-0fa95625dea7",
-    "d6_cabotagem_01": ""
+    "d6_cabotagem_01": "f4dd1006-da2d-4655-a54a-1123b0d0d7f7"
   };
 
   constructor(httpClient: AxiosInstance, uuid: uuidFunction) {
