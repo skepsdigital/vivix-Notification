@@ -13,6 +13,7 @@
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Responder } from '../commom/Responder';
+import { isAuthorized } from '../commom/BasicAuth';
 
 import axios from 'axios';
 import BodyRequest from 'src/commom/BodyRequest';
@@ -23,6 +24,9 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const responder = new Responder();
+  if (!isAuthorized(event)) {
+    return responder.send(401, { error: 'Não autorizado' }, { 'WWW-Authenticate': 'Basic realm="NotificationVivix"' });
+  }
   try {
     const useCase = new notification(axios, uuidv4);
     const body = JSON.parse(event.body as string);
