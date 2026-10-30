@@ -11,7 +11,8 @@ export class notification {
     "d3_monitoramento_01": "323a3c21-7573-4b73-91e6-e9145b18020c",
     "d4_liberacao_01": "23f6aadc-bc47-4bd7-8bbb-b00eb1e08e4f",
     "d5_solicitacao_01": "d3ca8f10-e72e-4696-b2ce-0fa95625dea7",
-    "d5_solicitacao_02": "d3ca8f10-e72e-4696-b2ce-0fa95625dea7"
+    "d5_solicitacao_02": "d3ca8f10-e72e-4696-b2ce-0fa95625dea7",
+    "d6_cabotagem_01": "f4dd1006-da2d-4655-a54a-1123b0d0d7f7"
   };
 
   constructor(httpClient: AxiosInstance, uuid: uuidFunction) {
@@ -20,6 +21,7 @@ export class notification {
   }
 
   async init(body: any) {
+    if (body.Harbor !== undefined) body = this.normalizarMaritimo(body);
     const templateKey = this.identificarTemplate(body);
     const mensagensParams = this.formatarBody(body, templateKey);
     const mensagensConfig = this.formatar(body, templateKey);
@@ -87,7 +89,23 @@ export class notification {
     return results;
   }
 
+  normalizarMaritimo(body: any) {
+    return {
+      nome: body.ContactName,
+      whatsApp: body.WhatsappNumber,
+      nf: body.InvoiceNum,
+      numPedido: body.OrderNumber,
+      detalhe: body.ObservationDefault,
+      previsaoChegada: body.EstimatedDelivery,
+      portoDestino: body.Harbor,
+      container: body.Container,
+      identificadorExterno: body.ExternalId,
+      observacao: body.ObservationAdd,
+    };
+  }
+
   identificarTemplate(body: any): string {
+    if (body.portoDestino !== undefined) return "d6_cabotagem_01";
     if (body.transportadora) return "d3_monitoramento_01";
     if (body.horarioChegada) return "d2_motorista_01";
     if (body.listaPedidosPendentes && body.listaPedidosPendentes.length > 0) {
@@ -138,6 +156,13 @@ export class notification {
           messageTemplate: "d1_liberado_01",
           messageTemplateLanguage: "pt_BR",
           messageParams: ["1", "2"],
+        };
+
+      case "d6_cabotagem_01":
+        return {
+          messageTemplate: "d6_cabotagem_01",
+          messageTemplateLanguage: "pt_BR",
+          messageParams: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
         };
 
       case "d4_liberacao_01":
@@ -205,6 +230,18 @@ export class notification {
         return {
           "1": body.nome,
           "2": body.numPedido
+        };
+      case "d6_cabotagem_01":
+        return {
+          "1": body.nome,
+          "2": body.nf,
+          "3": body.numPedido,
+          "4": body.detalhe || "-",
+          "5": body.previsaoChegada,
+          "6": body.portoDestino,
+          "7": body.container,
+          "8": body.identificadorExterno,
+          "9": body.observacao || "-",
         };
       case "d4_liberacao_01":
         return (body.listaPedidosPendentes || []).map((pedido: any) => {
